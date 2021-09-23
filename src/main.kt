@@ -1,5 +1,3 @@
-package chess
-
 var playerOne = ""
 var playerTwo = ""
 var playersTurn = playerOne
@@ -15,6 +13,15 @@ val board = mutableListOf(
     mutableListOf("8", " ", " ", " ", " ", " ", " ", " ", " "),
 )
 
+val regex = Regex("[a-h][1-8][a-h][1-8]")
+var move = ""
+var y1 = 0
+var x1 = 0
+var y2 = 0
+var x2 = 0
+var selectedPiece = "W"
+
+
 fun startGame() {
     println("Pawns-Only Chess")
     println("First Player's name:")
@@ -23,35 +30,20 @@ fun startGame() {
     playerTwo = readLine()!!.toString()
 }
 
+/**
+ * Converts the column letter into a number so data can be pulled about the board matrix.
+ */
 fun convertLetterToNum(letter: Char): Int {
     return when (letter) {
-        'a' -> {
-            1
-        }
-        'b' -> {
-            2
-        }
-        'c' -> {
-            3
-        }
-        'd' -> {
-            4
-        }
-        'e' -> {
-            5
-        }
-        'f' -> {
-            6
-        }
-        'g' -> {
-            7
-        }
-        'h' -> {
-            8
-        }
-        else -> {
-            0
-        }
+        'a' -> 1
+        'b' -> 2
+        'c' -> 3
+        'd' -> 4
+        'e' -> 5
+        'f' -> 6
+        'g' -> 7
+        'h' -> 8
+        else -> 0
     }
 }
 
@@ -70,6 +62,9 @@ fun displayBoard() {
     }
 }
 
+/**
+ * Alternates turns until end of game
+ */
 fun turn() {
     var gameOn = true
 
@@ -77,48 +72,18 @@ fun turn() {
     // Alternates turns until end of game.
     while (gameOn) {
         println("$playersTurn's turn: ")
-        val move = readLine()!!.toString().toLowerCase()
-        val regex = Regex("[a-h][1-8][a-h][1-8]")
+        move = readLine()!!.toString()
+
 
         if (move.matches(regex)) {
-            val y1 = convertLetterToNum(move[0])
-            val x1 = move[1].toString().toInt()
-            val y2 = convertLetterToNum(move[2])
-            val x2 = move[3].toString().toInt()
-            val piece = board[x1][y1]
+            y1 = convertLetterToNum(move[0])
+            x1 = move[1].toString().toInt()
+            y2 = convertLetterToNum(move[2])
+            x2 = move[3].toString().toInt()
+            selectedPiece = board[x1][y1]
 
-            if (playersTurn == playerOne && piece == "W") {
+            if (playersTurn == playerOne) whiteTurn() else blackTurn()
 
-                if (y1 == y2 && (x1 + 1 == x2 || (x1 == 2 && x2 == 4))) {
-                    if (board[x2][y2] == "B") {
-                        println("Invalid Input")
-                    } else {
-                        board[x2][y2] = "W"
-                        board[x1][y1] = " "
-                        displayBoard()
-                        playersTurn = playerTwo
-                    }
-                } else println("Invalid Input")
-            } else if (playersTurn == playerTwo && piece == "B") {
-                if (y1 == y2 && (x1 - 1 == x2 || (x1 == 7 && x2 == 5))) {
-                    if (board[x2][y2] == "W") {
-                        println("Invalid input")
-                    } else {
-                        board[x2][y2] = "B"
-                        board[x1][y1] = " "
-                        displayBoard()
-                        playersTurn = playerOne
-                    }
-                } else println("Invalid Input")
-            } else {
-                println(
-                    "No " + if (playersTurn == playerOne) {
-                        "white pawn"
-                    } else {
-                        "black pawn"
-                    } + " at ${move[0]}$x1"
-                )
-            }
         } else {
             if (move.toLowerCase() == "exit") {
                 println("Bye!")
@@ -130,10 +95,51 @@ fun turn() {
     }
 }
 
+fun whiteTurn() {
+    if (selectedPiece != "W") return noPawn()
+
+    if (y1 == y2 && (x1 + 1 == x2 || (x1 == 2 && x2 == 4))) {
+        if (board[x2][y2] == "B") {
+            println("Invalid input")
+        } else {
+            updatePieceLocation("W")
+            playersTurn = playerTwo
+        }
+    } else println("Invalid input")
+}
+
+fun blackTurn() {
+    if (selectedPiece != "B") return noPawn()
+
+    if (y1 == y2 && (x1 - 1 == x2 || (x1 == 7 && x2 == 5))) {
+        if (board[x2][y2] == "W") {
+            println("Invalid input")
+        } else {
+            updatePieceLocation("B")
+            playersTurn = playerOne
+        }
+    } else println("Invalid Input")
+}
+
+fun updatePieceLocation(piece: String) {
+    board[x2][y2] = piece
+    board[x1][y1] = " "
+    displayBoard()
+}
+
+fun noPawn() {
+    println(
+        "No " + if (playersTurn == playerOne) {
+            "white pawn"
+        } else {
+            "black pawn"
+        } + " at ${move[0]}$x1"
+    )
+}
+
 fun main() {
     startGame()
     displayBoard()
     turn()
 }
-
 
